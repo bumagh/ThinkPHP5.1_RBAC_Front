@@ -33,6 +33,7 @@ export default {
       if (res.code == 1) {
         this.$msg.success(res.msg);
         window.sessionStorage.setItem('token', res.token);
+        this.$router.push('/');
       } else {
         this.$msg.error(res.msg);
 
