@@ -13,6 +13,7 @@
           <template slot-scope="scope">
             <el-button type="primary" size="mini" @click="edit(scope.row)">编辑</el-button>
             <el-button type="danger" size="mini" @click="del(scope.row.id)">删除</el-button>
+            <el-button type="warning" size="mini" @click="ass(scope.row.id)">分配角色</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -52,6 +53,18 @@
           <el-button type="primary" @click="editsave">确定</el-button>
         </span>
       </el-dialog>
+
+      <el-dialog title="分配角色" :visible.sync="assDialogVisible" width="30%">
+        <el-form :model="roleForm" label-width="80px">
+          <el-checkbox-group v-model="checkList">
+            <el-checkbox :label="item.id" v-for="(item, index) in roleList">{{ item.name }}</el-checkbox>
+          </el-checkbox-group>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="onCloseAss">取消</el-button>
+          <el-button type="primary" @click="assSave">确定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -77,7 +90,15 @@ export default {
       editform: {
         username: '',
         status: ''
-      }
+      },
+      assDialogVisible: false,
+      roleList: [],
+      checkList: [],
+      roleForm: {
+        id: '',
+        name: ''
+      },
+      admin_id: '',
     }
   },
   created() {
@@ -88,6 +109,34 @@ export default {
       const { data: res } = await this.$ajax.get('http://rbac/api/v1.admin/index', { params: this.param });
       this.tableData = res.data;
       this.total = res.count;
+    },
+    onCloseAss() {
+      this.assDialogVisible = false;
+      this.checkList = [];
+      this.admin_id = '';
+    },
+    async assSave() {
+      let postData = {
+        admin_id: this.admin_id,
+        role_ids: this.checkList.toString(),
+      }
+      const { data: res } = await this.$ajax.post('http://rbac/api/v1.admin_role/save', postData);
+      if (res.code == 0) {
+        this.$msg.success(res.msg);
+      } else
+        this.$msg.error(res.msg);
+      // this.tableData = res.data;
+      // this.total = res.count;
+      this.onCloseAss();
+    },
+    async ass(id) {
+      this.admin_id = id;
+      const { data: res } = await this.$ajax.get('http://rbac/api/v1.role/lists');
+      this.roleList = res.data;
+      const { data: checkList } = await this.$ajax.get('http://rbac/api/v1.admin_role/adminroleids', { params: { admin_id: id } });
+      if (checkList.code == 0)
+        this.checkList = checkList.data;
+      this.assDialogVisible = true;
     },
     async addSave() {
       const { data: res } = await this.$ajax.post('http://rbac/api/v1.admin/save', this.addform);
