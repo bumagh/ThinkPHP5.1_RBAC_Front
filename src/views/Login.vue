@@ -1,14 +1,14 @@
 <template>
-  <div>
-    <el-form label-width="80px">
+  <div class="login">
+    <el-form v-model="LoginForm" label-width="80px">
       <el-form-item label="用户名">
-        <el-input></el-input>
+        <el-input v-model="LoginForm.username" clearable></el-input>
       </el-form-item>
       <el-form-item label="密码">
-        <el-input></el-input>
+        <el-input type="password" v-model="LoginForm.password" clearable></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">登录</el-button>
+        <el-button type="primary" @click="login()">登录</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -18,10 +18,27 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 export default {
+  data() {
+    return {
+      LoginForm: {
+        username: '',
+        password: ''
+      }
+    }
+  },
   methods: {
-    login() {
-      
+   async login() {
+      let url = "http://rbac/api/login/index?username=admin&password=123456";
+      const {data:res} = await this.$ajax.post(url, this.LoginForm);
+      console.log(res);
     }
   }
 }
 </script>
+<style scoped>
+.login {
+  width: 500px;
+  margin: 0 auto;
+  margin-top: 200px;
+}
+</style>
