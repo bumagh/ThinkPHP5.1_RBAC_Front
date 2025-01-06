@@ -27,5 +27,25 @@ const routes = [
 const router = new VueRouter({
   routes
 })
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') {
+    next();
+    return;
+  }
+
+  const token = window.sessionStorage.getItem('token');
+
+  // 模拟 token 验证
+  const isValidToken = (token) => {
+    // 在实际场景中，可以调用后端接口验证 token
+    return token && token.length > 10; // 示例条件
+  };
+
+  if (!isValidToken(token)) {
+    next('/login'); // 跳转到登录页
+  } else {
+    next(); // 放行
+  }
+});
 
 export default router
