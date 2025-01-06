@@ -27,10 +27,16 @@ export default {
     }
   },
   methods: {
-   async login() {
+    async login() {
       let url = "http://rbac/api/login/index?username=admin&password=123456";
-      const {data:res} = await this.$ajax.post(url, this.LoginForm);
-      console.log(res);
+      const { data: res } = await this.$ajax.post(url, this.LoginForm);
+      if (res.code == 1) {
+        this.$msg.success(res.msg);
+        window.sessionStorage.setItem('token', res.token);
+      } else {
+        this.$msg.error(res.msg);
+
+      }
     }
   }
 }
