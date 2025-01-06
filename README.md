@@ -1,5 +1,5 @@
 # rbacfront
-
+vue2 + elementUI
 ## Project setup
 ```
 npm install
