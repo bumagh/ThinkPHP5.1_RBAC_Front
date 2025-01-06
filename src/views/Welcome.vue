@@ -16,7 +16,7 @@
           </template>
           <el-menu-item index="/role">角色列表</el-menu-item>
         </el-submenu>
-        <el-submenu index="3">   
+        <el-submenu index="3">
           <template slot="title">
             <i class="el-icon-message"></i>
             规则
@@ -27,7 +27,7 @@
     </el-aside>
     <el-container>
       <el-header>
-        <el-button type="primary" @click="logout()">退出</el-button>
+        <el-button type="primary" @click="logout()" class="logout-btn">退出</el-button>
       </el-header>
       <el-main>
         <router-view></router-view>
@@ -47,7 +47,8 @@ export default {
   },
   methods: {
     logout() {
-
+      window.sessionStorage.clear();
+      this.$router.push('/login');
     }
   }
 }
@@ -64,5 +65,15 @@ export default {
 
 .el-aside {
   background-color: #ccc;
+  height: 100%;
+}
+
+.el-main {
+  background-color: #fff;
+}
+
+.logout-btn {
+  float: right;
+  margin-top: 10px;
 }
 </style>
