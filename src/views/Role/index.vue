@@ -14,7 +14,7 @@
           <template slot-scope="scope">
             <el-button type="primary" size="mini" @click="edit(scope.row)">编辑</el-button>
             <el-button type="danger" size="mini" @click="del(scope.row.id)">删除</el-button>
-            <el-button type="warning" size="mini" @click="ass(scope.row.id)">分配规则</el-button>
+            <el-button type="warning" size="mini" @click="assRule(scope.row.id)">分配规则</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -51,6 +51,15 @@
           <el-button type="primary" @click="editsave">确定</el-button>
         </span>
       </el-dialog>
+
+      <el-dialog title="分配规则"  :visible.sync="assRuleDialogVisible" width="30%">
+        <el-tree node-key="id" ref="tree" :default-checked-keys="defaultCheckedKeys" default-expand-all :data="data" :props="props"   show-checkbox @check-change="handleCheckChange">
+        </el-tree>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="assRuleDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="assRuleSave">确定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -58,6 +67,11 @@
 export default {
   data() {
     return {
+      props: {
+        children:'_child',
+        label:'name'
+      },
+      data: [],
       currentPage: 1,
       tableData: [],
       param: {
@@ -72,10 +86,14 @@ export default {
         status: '1'
       },
       editDialogVisible: false,
+      assRuleDialogVisible: false,
+      defaultCheckedKeys:[],
       editform: {
         name: '',
         status: ''
-      }
+      },
+      checkedRuleIds:[],
+      role_id:'',
     }
   },
   created() {
@@ -106,6 +124,36 @@ export default {
         this.editDialogVisible = false;
       } else {
         this.$msg.error(res.msg);
+      }
+    },
+    async assRule(id) {
+      this.role_id = id;
+      const { data: rules } = await this.$ajax.get('http://rbac/api/v1.role_rule/getUrlRoleid',{params:{role_id:id}});
+      this.defaultCheckedKeys = rules.data;
+      const { data: res } = await this.$ajax.get('http://rbac/api/v1.role_rule/getTree');
+      this.data = res.data;
+      // const { data: checkList } = await this.$ajax.get('http://rbac/api/v1.admin_role/adminroleids', { params: { admin_id: id } });
+      // if (checkList.code == 0)
+      //   this.checkList = checkList.data;
+      this.assRuleDialogVisible = true;
+    },
+    handleCheckChange(data, checked, indeterminate){
+      this.checkedRuleIds = this.$refs.tree.getCheckedKeys();
+    },
+    async assRuleSave() { 
+      let postData = {
+        role_id:this.role_id,
+        rule_ids:this.checkedRuleIds.toString()
+      }
+      const { data: res } = await this.$ajax.post('http://rbac/api/v1.role_rule/save',postData);
+      if(res.code == 0){
+        this.$msg.success(res.msg);
+        this.assRuleDialogVisible = false;
+        this.role_id = '';
+        this.checkedRuleIds = [];
+      }else{
+        this.$msg.error(res.msg);
+
       }
     },
     edit(info) {
